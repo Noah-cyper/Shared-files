@@ -226,23 +226,45 @@ async function tlsOptions() {
   return { key: pems.private, cert: pems.cert };
 }
 
-attach(createHttp(app)).listen(HTTP_PORT, '0.0.0.0', () => {
-  console.log(`\n  Shared Files - chia se file P2P toc do cao\n`);
-  console.log(`  HTTP : http://localhost:${HTTP_PORT}`);
-  for (const ip of lanIps()) console.log(`         http://${ip}:${HTTP_PORT}`);
-});
+const ready = { http: null, https: null };
+
+async function banner() {
+  const ip = lanIps()[0];
+  const best = ready.https && ip ? `https://${ip}:${HTTPS_PORT}`
+    : ip ? `http://${ip}:${HTTP_PORT}`
+    : `http://localhost:${HTTP_PORT}`;
+
+  console.log('\n  ' + '='.repeat(56));
+  console.log('   Shared Files - chia se file P2P toc do cao');
+  console.log('  ' + '='.repeat(56));
+  console.log('\n  May nay          : http://localhost:' + HTTP_PORT);
+  if (lanIps().length) {
+    console.log('  May khac cung wifi: ' + lanIps().map(i => `http://${i}:${HTTP_PORT}`).join('\n' + ' '.repeat(22)));
+  }
+  if (ready.https) {
+    console.log('\n  Dien thoai (nen dung ban HTTPS de stream file lon + copy clipboard):');
+    console.log('                     ' + lanIps().concat('localhost').map(i => `https://${i}:${HTTPS_PORT}`).join('\n' + ' '.repeat(21)));
+    console.log('\n  Chung chi tu ky -> trinh duyet canh bao 1 lan:');
+    console.log('  bam "Advanced / Nang cao" -> "Proceed / Tiep tuc".');
+  }
+
+  try {
+    console.log('\n  Quet QR bang camera dien thoai de mo ' + best + ':\n');
+    console.log(await QRCode.toString(best, { type: 'terminal', small: true }));
+  } catch { /* terminal khong ve duoc QR thi thoi */ }
+  console.log('  Dung: Ctrl + C\n');
+}
+
+attach(createHttp(app)).listen(HTTP_PORT, '0.0.0.0', () => { ready.http = true; });
 
 if (ENABLE_HTTPS) {
   try {
     const server = attach(createHttps(await tlsOptions(), app));
-    server.on('error', e => console.warn('  HTTPS loi:', e.message));
-    server.listen(HTTPS_PORT, '0.0.0.0', () => {
-      console.log(`\n  HTTPS (nen dung tren dien thoai):`);
-      console.log(`         https://localhost:${HTTPS_PORT}`);
-      for (const ip of lanIps()) console.log(`         https://${ip}:${HTTPS_PORT}`);
-      console.log(`\n  Chung chi tu ky -> trinh duyet se canh bao, bam "Advanced / Nang cao" -> "Proceed".\n`);
-    });
+    server.on('error', e => console.warn('  Bo qua HTTPS:', e.message));
+    await new Promise(res => server.listen(HTTPS_PORT, '0.0.0.0', () => { ready.https = true; res(); }));
   } catch (e) {
     console.warn('  Bo qua HTTPS:', e.message);
   }
 }
+
+banner();

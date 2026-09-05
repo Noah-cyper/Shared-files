@@ -1,0 +1,51 @@
+SHARED FILES - chia se file toc do cao giua cac may
+===================================================
+
+CAI DAT
+-------
+1. Cai Node.js ban LTS: https://nodejs.org  (chi can cai 1 lan)
+2. Giai nen thu muc nay ra dau cung duoc.
+3. Chay:
+     - Windows : nhan doi vao  start.bat
+     - macOS   : nhan doi vao  start.command
+                 (neu bao "khong mo duoc" -> chuot phai -> Open -> Open)
+     - Linux   : sh start.sh
+
+Thu muc da co san node_modules nen KHONG can chay "npm install".
+
+CHAY THU
+--------
+Sau khi chay, cua so den se hien ra cac dia chi va mot ma QR.
+
+  - Tren chinh may nay : mo http://localhost:3000
+  - May/dien thoai khac cung wifi: mo dia chi http://192.168.x.x:3000
+    (hoac quet ma QR trong cua so den bang camera dien thoai)
+
+  Tren dien thoai nen dung ban https://192.168.x.x:3443
+  -> trinh duyet canh bao chung chi 1 lan, bam "Advanced/Nang cao" -> "Proceed".
+
+Mo tren 2 may la chung tu thay nhau o muc "Cung mang WiFi".
+Bam Chon file -> bam vao thiet bi kia -> ben kia bam Nhan. Xong.
+
+HAI MAY KHAC MANG (khac wifi, khac nha)
+---------------------------------------
+Ca hai deu mo cung 1 dia chi ung dung (dat tren mot may chay 24/7 hoac VPS).
+May A dua ma 6 ky tu (hoac QR / link) - May B nhap ma do vao o "Nhap ma
+cua nguoi kia" -> Ket noi. File van di thang may sang may.
+
+Neu mang chan ket noi truc tiep (NAT doi xung) thi can them TURN server:
+     Windows : set TURN_URL=turn:host:3478 & set TURN_USERNAME=u & set TURN_PASSWORD=p & node server.js
+     Mac/Linux: TURN_URL=turn:host:3478 TURN_USERNAME=u TURN_PASSWORD=p node server.js
+
+DOI CONG
+--------
+     Windows : set PORT=8080 & node server.js
+     Mac/Linux: PORT=8080 node server.js
+
+LUU Y
+-----
+- File di THANG tu may nay sang may kia, khong luu tren server, duoc ma hoa
+  dau-cuoi boi WebRTC.
+- Muon nhan file lon (vai GB) nhanh nhat: bam "Chon thu muc luu" o cuoi trang
+  (Chrome/Edge tren may tinh) de ghi thang xuong o dia.
+- Tat ung dung: bam Ctrl + C trong cua so den, hoac dong cua so.
