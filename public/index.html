@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Shared Files — chia sẻ file tốc độ cao</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="logo">⚡</span><b>Shared Files</b></div>
+  <div class="me">
+    <span id="status" class="status offline"></span>
+    <span>Bạn là</span>
+    <span id="myName" contenteditable="true" spellcheck="false" title="Bấm để đổi tên">…</span>
+  </div>
+</header>
+
+<main>
+  <section class="card send">
+    <div class="row">
+      <button id="fileBtn" class="btn primary">Chọn file</button>
+      <button id="folderBtn" class="btn">Chọn thư mục</button>
+      <span class="hint">hoặc kéo–thả file vào đây, rồi bấm vào thiết bị muốn gửi</span>
+    </div>
+    <div id="staged" class="staged" hidden>
+      <span id="stagedText"></span>
+      <button id="stagedClear" class="btn tiny">Bỏ chọn</button>
+    </div>
+    <input id="fileInput" type="file" multiple hidden>
+    <input id="folderInput" type="file" webkitdirectory hidden>
+  </section>
+
+  <section class="card">
+    <h2>Cùng mạng WiFi / LAN <span class="tag fast">nhanh nhất</span></h2>
+    <p class="sub">Các thiết bị dưới đây đang dùng chung một mạng với bạn. File đi thẳng trong LAN, không ra Internet.</p>
+    <div id="lanList" class="peers"></div>
+    <p id="lanEmpty" class="empty">Chưa thấy thiết bị nào. Mở cùng địa chỉ này trên máy/điện thoại khác trong cùng WiFi.</p>
+  </section>
+
+  <section class="card">
+    <h2>Khác mạng / khác Internet</h2>
+    <p class="sub">Chia sẻ mã hoặc quét QR để ghép đôi hai thiết bị ở hai mạng khác nhau. File vẫn đi thẳng máy ↔ máy.</p>
+
+    <div class="pair">
+      <div class="pair-col">
+        <div class="code-box">
+          <span class="label">Mã của bạn</span>
+          <div class="code" id="myCode">······</div>
+          <div class="row">
+            <button id="copyCode" class="btn tiny">Copy mã</button>
+            <button id="copyLink" class="btn tiny">Copy link</button>
+          </div>
+          <input id="shareUrl" class="url" readonly>
+        </div>
+        <form id="joinForm" class="join">
+          <input id="joinCode" placeholder="Nhập mã của người kia" autocomplete="off" spellcheck="false" maxlength="12">
+          <button class="btn primary">Kết nối</button>
+        </form>
+      </div>
+      <div class="pair-col qr-col">
+        <img id="qr" class="qr" alt="Mã QR để ghép đôi">
+        <span class="hint">Quét bằng camera điện thoại</span>
+      </div>
+    </div>
+
+    <div id="remoteList" class="peers"></div>
+    <p id="remoteEmpty" class="empty">Chưa ghép đôi với thiết bị nào ngoài mạng.</p>
+  </section>
+
+  <section id="transferSection" class="card" hidden>
+    <h2>Truyền file</h2>
+    <div id="transfers"></div>
+  </section>
+
+  <section class="card">
+    <h2>Gửi nhanh đoạn text</h2>
+    <div class="row">
+      <textarea id="textOut" rows="2" placeholder="Dán link, mật khẩu, ghi chú… gửi tới mọi thiết bị đang kết nối"></textarea>
+      <button id="textSend" class="btn">Gửi</button>
+    </div>
+    <div id="textIn" class="text-in" hidden>
+      <b id="textInFrom"></b>
+      <pre id="textInBody"></pre>
+      <button id="textCopy" class="btn tiny">Copy</button>
+    </div>
+  </section>
+
+  <section class="card settings">
+    <label class="switch"><input id="autoAccept" type="checkbox"> Tự động nhận file, không hỏi</label>
+    <div class="row">
+      <button id="pickFolder" class="btn tiny">Chọn thư mục lưu</button>
+      <span id="saveMode" class="save-mode"></span>
+    </div>
+  </section>
+</main>
+
+<footer>File được mã hoá đầu-cuối bởi WebRTC (DTLS/SRTP) và không bao giờ đi qua máy chủ — server chỉ giúp hai máy tìm thấy nhau.</footer>
+
+<div id="drop" class="drop" hidden><div>Thả file vào đây</div></div>
+<div id="toasts" class="toasts"></div>
+
+<dialog id="askDialog" class="ask">
+  <form method="dialog">
+    <h3 id="askTitle"></h3>
+    <p id="askBody"></p>
+    <div class="row end">
+      <button class="btn" value="no">Từ chối</button>
+      <button class="btn primary" value="ok">Nhận</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

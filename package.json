@@ -1,0 +1,18 @@
+{
+  "name": "shared-files",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Chia se file toc do cao P2P (WebRTC): cung WiFi, cung Internet hoac khac mang",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "selfsigned": "^2.4.1",
+    "ws": "^8.18.0"
+  },
+  "engines": { "node": ">=18" }
+}
