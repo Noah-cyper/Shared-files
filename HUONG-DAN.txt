@@ -1,51 +1,94 @@
 SHARED FILES - chia se file toc do cao giua cac may
-===================================================
+====================================================
 
-CAI DAT
--------
-1. Cai Node.js ban LTS: https://nodejs.org  (chi can cai 1 lan)
-2. Giai nen thu muc nay ra dau cung duoc.
-3. Chay:
-     - Windows : nhan doi vao  start.bat
-     - macOS   : nhan doi vao  start.command
-                 (neu bao "khong mo duoc" -> chuot phai -> Open -> Open)
-     - Linux   : sh start.sh
+Trong goi nay co gi
+-------------------
+  Cai-dat-Windows.bat    <- Windows: nhan doi vao day
+  Cai-dat-macOS.command  <- macOS  : nhan doi vao day
+  Cai-dat-Linux.sh       <- Linux  : sh Cai-dat-Linux.sh
+  app\                   <- ban than ung dung (co the chay truc tiep, khong can cai)
 
-Thu muc da co san node_modules nen KHONG can chay "npm install".
 
-CHAY THU
---------
-Sau khi chay, cua so den se hien ra cac dia chi va mot ma QR.
+1. CAI TREN MAY TINH
+--------------------
+Buoc 1: Cai Node.js ban LTS o https://nodejs.org (chi lam 1 lan cho ca may).
+Buoc 2: Nhan doi file cai dat tuong ung voi he dieu hanh cua may.
 
-  - Tren chinh may nay : mo http://localhost:3000
-  - May/dien thoai khac cung wifi: mo dia chi http://192.168.x.x:3000
-    (hoac quet ma QR trong cua so den bang camera dien thoai)
+  - Windows: tao san loi tat "Shared Files" ngoai Desktop va trong Start Menu.
+  - macOS  : tao app trong thu muc Applications cua Home.
+             Neu bao "khong mo duoc vi khong ro nguon goc" -> chuot phai vao
+             file cai dat -> Open -> Open.
+  - Linux  : tao muc "Shared Files" trong danh sach ung dung.
 
-  Tren dien thoai nen dung ban https://192.168.x.x:3443
-  -> trinh duyet canh bao chung chi 1 lan, bam "Advanced/Nang cao" -> "Proceed".
+Khong muon cai: vao thu muc app roi chay start.bat (Windows) /
+start.command (macOS) / sh start.sh (Linux).
 
-Mo tren 2 may la chung tu thay nhau o muc "Cung mang WiFi".
-Bam Chon file -> bam vao thiet bi kia -> ben kia bam Nhan. Xong.
+Mo ung dung se hien mot cua so den in ra dia chi va mot ma QR.
+  - Tren chinh may nay          : http://localhost:3000
+  - May khac cung wifi          : http://192.168.x.x:3000
+Mo dia chi do tren may thu hai la hai may tu thay nhau.
+Bam "Chon file" -> bam vao thiet bi kia -> ben kia bam "Nhan". Xong.
 
-HAI MAY KHAC MANG (khac wifi, khac nha)
----------------------------------------
-Ca hai deu mo cung 1 dia chi ung dung (dat tren mot may chay 24/7 hoac VPS).
-May A dua ma 6 ky tu (hoac QR / link) - May B nhap ma do vao o "Nhap ma
-cua nguoi kia" -> Ket noi. File van di thang may sang may.
+
+2. CAI TREN DIEN THOAI
+----------------------
+Dien thoai KHONG can file cai dat rieng. App chay tren dien thoai chinh la
+trang web cua may tinh, va co the them vao man hinh chinh nhu mot app that.
+
+Cach lam (mat khoang 2 phut, moi dien thoai chi lam 1 lan):
+
+  Buoc 1: Mo ung dung tren may tinh, quet ma QR trong cua so den bang camera
+          dien thoai. (Hoac go tay http://192.168.x.x:3000/cai-dat.html)
+          Dien thoai phai chung wifi voi may tinh.
+
+  Buoc 2: Trang do se huong dan tai va cai "chung chi" cua may tinh.
+          - iPhone : bam nut iPhone/iPad -> vao Cai dat -> Da tai ho so ->
+                     Cai dat -> roi vao Cai dat > Cai dat chung > Gioi thieu >
+                     Cai dat tin cay chung chi -> bat "Shared Files Local CA".
+          - Android: bam nut Android -> vao Cai dat > Bao mat > Cai chung chi
+                     > Chung chi CA -> chon file vua tai.
+
+  Buoc 3: Bam nut "Mo ung dung" (dia chi https://...) roi:
+          - iPhone : nut Chia se -> "Them vao MH chinh"
+          - Android: Chrome se hien "Cai dat ung dung", bam vao
+
+  Xong. App nam o man hinh chinh, mo ra la dung nhu app binh thuong.
+
+Chung chi o buoc 2 la do chinh may tinh cua ban tao ra, khoa rieng nam trong
+thu muc .cert tren may tinh va khong gui di dau. No chi de dien thoai khong
+bao "khong an toan" khi vao dia chi HTTPS cua may tinh. Neu bo qua buoc nay
+thi van dung duoc, chi la file nhan ve phai di qua bo nho tam cua trinh duyet
+(file vai GB se nang may) va khong them duoc app vao man hinh chinh.
+Muon go: xoa "Shared Files Local CA" trong phan chung chi cua dien thoai.
+
+
+3. HAI MAY KHAC MANG (khac wifi, khac nha)
+------------------------------------------
+Ca hai deu phai mo cung mot dia chi ung dung, nghia la may chay ung dung phai
+truy cap duoc tu ben ngoai (dat tren VPS, hoac mo port / dung ngrok).
+Sau do: may A dua ma 6 ky tu (hoac QR / link) - may B nhap ma do vao o
+"Nhap ma cua nguoi kia" -> Ket noi. File van di thang may sang may.
 
 Neu mang chan ket noi truc tiep (NAT doi xung) thi can them TURN server:
-     Windows : set TURN_URL=turn:host:3478 & set TURN_USERNAME=u & set TURN_PASSWORD=p & node server.js
-     Mac/Linux: TURN_URL=turn:host:3478 TURN_USERNAME=u TURN_PASSWORD=p node server.js
+  Windows  : set TURN_URL=turn:host:3478 & set TURN_USERNAME=u & set TURN_PASSWORD=p & node server.js
+  Mac/Linux: TURN_URL=turn:host:3478 TURN_USERNAME=u TURN_PASSWORD=p node server.js
 
-DOI CONG
---------
-     Windows : set PORT=8080 & node server.js
-     Mac/Linux: PORT=8080 node server.js
 
-LUU Y
------
-- File di THANG tu may nay sang may kia, khong luu tren server, duoc ma hoa
-  dau-cuoi boi WebRTC.
-- Muon nhan file lon (vai GB) nhanh nhat: bam "Chon thu muc luu" o cuoi trang
-  (Chrome/Edge tren may tinh) de ghi thang xuong o dia.
-- Tat ung dung: bam Ctrl + C trong cua so den, hoac dong cua so.
+4. LINH TINH
+------------
+Doi cong:
+  Windows  : set PORT=8080 & node server.js
+  Mac/Linux: PORT=8080 node server.js
+
+Nhan file lon (vai GB) nhanh nhat: bam "Chon thu muc luu" o cuoi trang
+(Chrome/Edge tren may tinh) de ghi thang xuong o dia.
+
+File di THANG tu may nay sang may kia, khong luu tren server, duoc ma hoa
+dau-cuoi boi WebRTC.
+
+Tat ung dung: bam Ctrl + C trong cua so den, hoac dong cua so.
+
+Go cai dat:
+  Windows  : chay Go-cai-dat.bat trong %LOCALAPPDATA%\SharedFiles
+  macOS    : chay Go-cai-dat-SharedFiles.command trong thu muc Applications
+  Linux    : sh ~/.local/share/shared-files/go-cai-dat.sh

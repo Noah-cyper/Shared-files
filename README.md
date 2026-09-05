@@ -12,7 +12,11 @@ Chạy được cả ba tình huống:
 
 Giao diện hiển thị đang chạy đường nào ngay trên thẻ thiết bị: *Mạng nội bộ* / *P2P qua Internet* / *Qua TURN*.
 
-## Chạy
+## Cài đặt
+
+**Bản đóng gói** (không cần `npm install`): giải nén rồi chạy `Cai-dat-Windows.bat`, `Cai-dat-macOS.command` hoặc `sh Cai-dat-Linux.sh`. Bộ cài chép app vào máy và tạo lối tắt/biểu tượng ứng dụng; xem `HUONG-DAN.txt` trong gói.
+
+**Từ mã nguồn:**
 
 ```bash
 npm install
@@ -29,9 +33,27 @@ HTTPS: https://192.168.1.20:3443
 
 Mở địa chỉ đó trên các thiết bị khác trong cùng WiFi là chúng tự thấy nhau.
 
-**Trên điện thoại nên dùng link HTTPS.** Chứng chỉ tự ký được sinh tự động ở lần chạy đầu (`.cert/`), trình duyệt sẽ cảnh báo — bấm *Advanced / Nâng cao → Proceed*. Dùng HTTPS thì mới có service worker để stream file lớn thẳng xuống ổ đĩa và mới copy được vào clipboard.
+**Trên điện thoại nên dùng link HTTPS** — xem mục *Cài lên điện thoại* ngay dưới. Chứng chỉ được sinh tự động ở lần chạy đầu và cấp lại khi IP LAN của máy đổi.
+
+Terminal cũng vẽ luôn một mã QR trỏ tới trang hướng dẫn cài lên điện thoại — quét bằng camera là mở được ngay.
 
 Tắt HTTPS: `HTTPS=0 npm start`. Đổi cổng: `PORT=8080 HTTPS_PORT=8443 npm start`.
+
+## Cài lên điện thoại
+
+Điện thoại không cần file cài riêng: app trên điện thoại chính là trang web này, và thêm được vào màn hình chính như app thật (PWA). Trang `/cai-dat.html` hướng dẫn từng bước cho iPhone và Android.
+
+Bước đáng làm nhất ở đó là **cài chứng chỉ của máy chủ vào điện thoại**. Lần chạy đầu, app tự sinh một CA riêng cho máy đang chạy nó (`.cert/ca.key` — khoá này không bao giờ rời khỏi máy) rồi ký chứng chỉ cho các IP LAN của máy. Cài CA đó vào điện thoại một lần thì:
+
+- HTTPS hết cảnh báo, nên service worker chạy được → file nhận về **stream thẳng xuống máy** thay vì phải nằm hết trong RAM
+- Chrome/Safari mới cho **cài app vào màn hình chính**
+- Clipboard, và các API chỉ chạy trong secure context, hoạt động bình thường
+
+App tải về ở hai dạng: `/ca.crt` cho Android và `/ca.mobileconfig` (hồ sơ cấu hình) cho iOS. Muốn gỡ: xoá *Shared Files Local CA* trong phần chứng chỉ của điện thoại.
+
+Vì lý do an toàn, CA **không được phát hành kèm mã nguồn**: nếu mọi bản cài dùng chung một CA thì ai cầm khoá đó cũng giả mạo được HTTPS của mọi máy đã cài. Mỗi máy tự sinh CA của riêng mình.
+
+Bỏ qua bước chứng chỉ vẫn dùng được bình thường qua `http://<ip>:3000`, chỉ là file nhận về đi qua RAM và không thêm được app vào màn hình chính.
 
 ## Cách dùng
 
@@ -91,9 +113,13 @@ Có thể tự dựng bằng [coturn](https://github.com/coturn/coturn). Không 
 ## Cấu trúc
 
 ```
-server.js            signaling qua WebSocket, gom peer theo IP public, sinh QR, tự tạo chứng chỉ
-public/js/rtc.js     engine truyền file: 4 DataChannel song song, backpressure, giao thức chunk
-public/js/writer.js  ba cách lưu file nhận được (thư mục / stream / RAM)
-public/js/app.js     giao diện, danh sách thiết bị, tiến trình, ghép đôi bằng mã
-public/sw.js         service worker biến stream thành file download
+server.js              signaling qua WebSocket, gom peer theo IP public, sinh QR, phục vụ CA
+certs.js               sinh CA riêng của máy + chứng chỉ cho IP LAN, hồ sơ .mobileconfig cho iOS
+public/js/rtc.js       engine truyền file: 4 DataChannel song song, backpressure, giao thức chunk
+public/js/writer.js    ba cách lưu file nhận được (thư mục / stream / RAM)
+public/js/app.js       giao diện, danh sách thiết bị, tiến trình, ghép đôi bằng mã
+public/sw.js           service worker: biến stream thành file download + cache vỏ app
+public/cai-dat.html    hướng dẫn cài lên điện thoại
+tools/make-icons.mjs   sinh icon PNG/ICO/ICNS cho PWA và cho app trên máy tính
+installers/            bộ cài cho Windows, macOS, Linux
 ```

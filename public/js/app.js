@@ -1,5 +1,5 @@
 import { Link } from './rtc.js';
-import { caps, chooseFolder, folderName, hasFolder, initStreamSaver, writerMode } from './writer.js';
+import { caps, chooseFolder, folderName, hasFolder, initServiceWorker, writerMode } from './writer.js';
 
 const $ = s => document.querySelector(s);
 const el = (tag, cls, text) => {
@@ -56,6 +56,7 @@ function connect() {
     state.links.clear();
     state.peers.clear();
     renderPeers();
+
     retry = Math.min(retry + 1, 6);
     setTimeout(connect, 500 * 2 ** retry);
   };
@@ -212,17 +213,25 @@ function renderIdentity() {
 
 const shareUrl = () => `${location.origin}/#${state.me.code}`;
 
-function renderPeers() {
-  const lan = [], remote = [];
-  for (const p of state.peers.values()) (p.sameLan ? lan : remote).push(p);
-  fill($('#lanList'), lan, $('#lanEmpty'));
-  fill($('#remoteList'), remote, $('#remoteEmpty'));
-}
+// Cập nhật tại chỗ chứ không dựng lại cả danh sách: có người vào/ra giữa chừng thì
+// thẻ đang bấm dở không bị thay mất, và nhãn đường truyền đã dò được vẫn còn.
+const cards = new Map();
 
-function fill(list, peers, empty) {
-  list.innerHTML = '';
-  empty.hidden = peers.length > 0;
-  for (const p of peers) list.appendChild(peerCard(p));
+function renderPeers() {
+  const alive = new Set();
+  for (const p of state.peers.values()) {
+    alive.add(p.id);
+    let card = cards.get(p.id);
+    if (!card) { card = peerCard(p); cards.set(p.id, card); }
+    card.querySelector('.peer-name').textContent = p.name;
+    const list = $(p.sameLan ? '#lanList' : '#remoteList');
+    if (card.parentElement !== list) list.appendChild(card);
+  }
+  for (const [id, card] of cards) {
+    if (!alive.has(id)) { card.remove(); cards.delete(id); }
+  }
+  $('#lanEmpty').hidden = $('#lanList').childElementCount > 0;
+  $('#remoteEmpty').hidden = $('#remoteList').childElementCount > 0;
 }
 
 function peerCard(p) {
@@ -476,6 +485,6 @@ function bindUi() {
 }
 
 bindUi();
-initStreamSaver().then(updateSaveMode);
+initServiceWorker().then(updateSaveMode);
 updateSaveMode();
 connect();

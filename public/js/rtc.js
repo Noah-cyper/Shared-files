@@ -40,7 +40,7 @@ export class Link extends EventTarget {
       try {
         await pc.setLocalDescription();
         signal({ sdp: pc.localDescription });
-      } catch (e) { this.emit('error', e.message); }
+      } catch (e) { this.emit('error', errText(e)); }
     };
 
     this.ctrl = pc.createDataChannel('ctrl', { negotiated: true, id: 0, ordered: true });
@@ -54,7 +54,7 @@ export class Link extends EventTarget {
       ch.binaryType = 'arraybuffer';
       ch.onmessage = e => this.onChunk(e.data);
       ch.onerror = e => {
-        if (this.tx || this.rx) this.emit('error', 'Kênh dữ liệu lỗi: ' + (e.error?.message || 'đứt kết nối'));
+        if (this.tx || this.rx) this.emit('error', 'Kênh dữ liệu lỗi: ' + errText(e.error));
       };
       this.data.push(ch);
     }
@@ -80,7 +80,7 @@ export class Link extends EventTarget {
       } else if (ice) {
         await this.pc.addIceCandidate(ice);
       }
-    } catch (e) { this.emit('error', e.message); }
+    } catch (e) { this.emit('error', errText(e)); }
   }
 
   /** 'lan' | 'p2p' | 'relay' | null - cho biết dữ liệu đang chạy đường nào */
@@ -143,7 +143,7 @@ export class Link extends EventTarget {
         this.ctrlSend({ t: 'done', tid: tx.tid });
       }
     } catch (e) {
-      if (!tx.aborted) this.emit('error', e.message);
+      if (!tx.aborted) this.emit('error', errText(e));
     } finally {
       clearInterval(tick);
       this.emit('tx-progress', this.stat(tx));
@@ -313,7 +313,7 @@ export class Link extends EventTarget {
       })
       .catch(async e => {
         if (rx.aborted) return;
-        this.emit('error', 'Không ghi được file: ' + e.message);
+        this.emit('error', 'Không lưu được file: ' + errText(e));
         this.ctrlSend({ t: 'cancel', tid: rx.tid });
         await this.abortRx();
       });
@@ -335,3 +335,7 @@ export class Link extends EventTarget {
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Stream bị huỷ giữa chừng reject bằng undefined chứ không phải Error, nên không
+// được đụng thẳng vào .message
+const errText = e => e?.message || (e == null ? 'kết nối bị ngắt' : String(e));

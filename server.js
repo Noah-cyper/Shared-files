@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { ensureCerts, mobileconfig } from './certs.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const HTTP_PORT = Number(process.env.PORT || 3000);
@@ -45,6 +46,29 @@ app.get('/api/qr', async (req, res) => {
     const svg = await QRCode.toString(text, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' });
     res.type('image/svg+xml').set('Cache-Control', 'no-store').send(svg);
   } catch { res.status(500).end(); }
+});
+
+app.get('/api/setup', (req, res) => {
+  const ips = lanIps();
+  res.json({
+    http: ips.map(ip => `http://${ip}:${HTTP_PORT}`),
+    https: ENABLE_HTTPS ? ips.map(ip => `https://${ip}:${HTTPS_PORT}`) : [],
+    ca: tls ? { fingerprint: tls.caFingerprint } : null
+  });
+});
+
+app.get('/ca.crt', (req, res) => {
+  if (!tls) return res.status(404).send('HTTPS dang tat');
+  res.type('application/x-x509-ca-cert')
+    .set('Content-Disposition', 'attachment; filename="SharedFiles-CA.crt"')
+    .send(tls.caPem);
+});
+
+app.get('/ca.mobileconfig', (req, res) => {
+  if (!tls) return res.status(404).send('HTTPS dang tat');
+  res.type('application/x-apple-aspen-config')
+    .set('Content-Disposition', 'attachment; filename="SharedFiles.mobileconfig"')
+    .send(mobileconfig(tls.caDer, tls.caFingerprint));
 });
 
 /* ---------- Ten hien thi ---------- */
@@ -204,35 +228,20 @@ function lanIps() {
     .map(i => i.address);
 }
 
-async function tlsOptions() {
-  const dir = path.join(ROOT, '.cert');
-  const keyFile = path.join(dir, 'key.pem');
-  const certFile = path.join(dir, 'cert.pem');
-  if (fs.existsSync(keyFile) && fs.existsSync(certFile)) {
-    return { key: fs.readFileSync(keyFile), cert: fs.readFileSync(certFile) };
-  }
-  const selfsigned = await import('selfsigned').then(m => m.default || m);
-  const altNames = [
-    { type: 2, value: 'localhost' },
-    { type: 7, ip: '127.0.0.1' },
-    ...lanIps().map(ip => ({ type: 7, ip }))
-  ];
-  const pems = selfsigned.generate([{ name: 'commonName', value: 'shared-files.local' }], {
-    days: 3650, keySize: 2048, algorithm: 'sha256', extensions: [{ name: 'subjectAltName', altNames }]
-  });
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(keyFile, pems.private);
-  fs.writeFileSync(certFile, pems.cert);
-  return { key: pems.private, cert: pems.cert };
+let tls = null;   // chứng chỉ đang dùng, cũng là nguồn của /ca.crt
+
+function loadCerts() {
+  tls = ensureCerts(path.join(ROOT, '.cert'), lanIps());
+  return tls;
 }
 
 const ready = { http: null, https: null };
 
 async function banner() {
   const ip = lanIps()[0];
-  const best = ready.https && ip ? `https://${ip}:${HTTPS_PORT}`
-    : ip ? `http://${ip}:${HTTP_PORT}`
-    : `http://localhost:${HTTP_PORT}`;
+  // QR trỏ vào trang huong dan cai dat qua HTTP: dien thoai chua tin chung chi
+  // thi khong mo duoc ban HTTPS, nen phai vao trang nay truoc de cai CA.
+  const setup = `http://${ip || 'localhost'}:${HTTP_PORT}/cai-dat.html`;
 
   console.log('\n  ' + '='.repeat(56));
   console.log('   Shared Files - chia se file P2P toc do cao');
@@ -249,8 +258,9 @@ async function banner() {
   }
 
   try {
-    console.log('\n  Quet QR bang camera dien thoai de mo ' + best + ':\n');
-    console.log(await QRCode.toString(best, { type: 'terminal', small: true }));
+    console.log('\n  DIEN THOAI: quet QR nay de mo huong dan cai app len man hinh chinh');
+    console.log('  ' + setup + '\n');
+    console.log(await QRCode.toString(setup, { type: 'terminal', small: true }));
   } catch { /* terminal khong ve duoc QR thi thoi */ }
   console.log('  Dung: Ctrl + C\n');
 }
@@ -259,7 +269,7 @@ attach(createHttp(app)).listen(HTTP_PORT, '0.0.0.0', () => { ready.http = true; 
 
 if (ENABLE_HTTPS) {
   try {
-    const server = attach(createHttps(await tlsOptions(), app));
+    const server = attach(createHttps(loadCerts(), app));
     server.on('error', e => console.warn('  Bo qua HTTPS:', e.message));
     await new Promise(res => server.listen(HTTPS_PORT, '0.0.0.0', () => { ready.https = true; res(); }));
   } catch (e) {

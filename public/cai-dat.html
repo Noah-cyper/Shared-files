@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Cài lên điện thoại — Shared Files</title>
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .steps { counter-reset: step; display: grid; gap: 16px; }
+  .step { position: relative; padding-left: 44px; }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), #7a5bff);
+  }
+  .step h2 { margin: 4px 0 6px; }
+  .qr-big { width: 220px; height: 220px; background: #fff; border-radius: 12px; padding: 8px; }
+  .os { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--bg); }
+  .os h3 { margin: 0; font-size: 14px; color: var(--accent2); }
+  .os ol { margin: 0; padding-left: 20px; color: var(--dim); font-size: 13.5px; line-height: 1.7; }
+  .os-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .fp { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--dim); word-break: break-all; }
+  .warn { border-left: 3px solid #ffcc66; padding-left: 12px; color: var(--dim); font-size: 13px; }
+  a.btn { text-decoration: none; display: inline-block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="logo">⚡</span><b>Shared Files</b></div>
+  <a class="btn tiny" href="/">← Về trang chính</a>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Cài lên điện thoại</h2>
+    <p class="sub">Làm một lần cho mỗi điện thoại. Sau đó app nằm ở màn hình chính và nhận được file lớn cỡ nào cũng ghi thẳng xuống máy.</p>
+  </section>
+
+  <section class="card steps">
+    <div class="step">
+      <h2>Mở trang này trên điện thoại</h2>
+      <p class="sub">Quét mã bên dưới bằng camera. Điện thoại phải chung wifi với máy tính này.</p>
+      <img id="qrSetup" class="qr-big" alt="QR mở trang cài đặt">
+      <p class="hint" id="setupUrl"></p>
+    </div>
+
+    <div class="step">
+      <h2>Cài chứng chỉ của máy tính này</h2>
+      <p class="sub">Bước này để điện thoại tin đường HTTPS của máy tính, nhờ vậy mới lưu được file lớn thẳng xuống máy và mới cài được app lên màn hình chính.</p>
+      <div class="row">
+        <a class="btn primary" href="/ca.mobileconfig">iPhone / iPad — tải hồ sơ</a>
+        <a class="btn primary" href="/ca.crt">Android — tải chứng chỉ</a>
+      </div>
+      <div class="os-grid" style="margin-top:12px">
+        <div class="os">
+          <h3>iPhone / iPad</h3>
+          <ol>
+            <li>Bấm nút tải ở trên, chọn <b>Cho phép</b>.</li>
+            <li>Vào <b>Cài đặt</b> → dòng <b>Đã tải hồ sơ</b> ở gần đầu → <b>Cài đặt</b>.</li>
+            <li>Vào <b>Cài đặt → Cài đặt chung → Giới thiệu → Cài đặt tin cậy chứng chỉ</b>, bật công tắc <b>Shared Files Local CA</b>.</li>
+          </ol>
+        </div>
+        <div class="os">
+          <h3>Android</h3>
+          <ol>
+            <li>Bấm nút tải ở trên.</li>
+            <li>Vào <b>Cài đặt → Bảo mật → Mã hoá &amp; thông tin đăng nhập → Cài chứng chỉ → Chứng chỉ CA</b> (một số máy: <i>Cài từ bộ nhớ</i>).</li>
+            <li>Chọn file <b>SharedFiles-CA.crt</b> vừa tải, xác nhận <b>Vẫn cài</b>.</li>
+          </ol>
+        </div>
+      </div>
+      <p class="warn" style="margin-top:12px">Chứng chỉ này do chính máy tính của anh tạo ra, khoá riêng nằm trong thư mục <code>.cert</code> và không rời khỏi máy. Chỉ cài trên điện thoại của mình. Muốn gỡ: xoá <b>Shared Files Local CA</b> trong phần chứng chỉ của điện thoại.</p>
+      <p class="fp" id="fp"></p>
+    </div>
+
+    <div class="step">
+      <h2>Mở app và thêm vào màn hình chính</h2>
+      <p class="sub">Bấm nút dưới để mở bản HTTPS — lúc này phải vào thẳng, không còn cảnh báo nào.</p>
+      <div class="row"><a id="openApp" class="btn primary" href="/">Mở ứng dụng</a></div>
+      <div class="os-grid" style="margin-top:12px">
+        <div class="os">
+          <h3>iPhone / iPad (Safari)</h3>
+          <ol>
+            <li>Bấm nút <b>Chia sẻ</b> ở thanh dưới.</li>
+            <li>Chọn <b>Thêm vào MH chính</b> → <b>Thêm</b>.</li>
+          </ol>
+        </div>
+        <div class="os">
+          <h3>Android (Chrome)</h3>
+          <ol>
+            <li>Chrome sẽ hiện thanh <b>Cài đặt ứng dụng</b> — bấm vào.</li>
+            <li>Không thấy thì bấm dấu <b>⋮</b> → <b>Thêm vào Màn hình chính</b>.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Không muốn cài chứng chỉ?</h2>
+    <p class="sub" style="margin:0">Vẫn dùng được bình thường: mở bản <b id="httpUrl">http</b> rồi gửi/nhận như trên máy tính. Chỉ khác là file nhận về đi qua bộ nhớ tạm của trình duyệt, nên file vài GB sẽ nặng máy, và không thêm được app vào màn hình chính.</p>
+  </section>
+</main>
+
+<script>
+(async () => {
+  const s = await fetch('/api/setup').then(r => r.json());
+  const host = location.hostname;
+  const pick = list => list.find(u => u.includes(host)) || list[0];
+
+  const setup = (pick(s.http) || location.origin) + '/cai-dat.html';
+  document.querySelector('#qrSetup').src = '/api/qr?d=' + encodeURIComponent(setup);
+  document.querySelector('#setupUrl').textContent = setup;
+  document.querySelector('#httpUrl').textContent = pick(s.http) || location.origin;
+
+  const app = s.https.length ? pick(s.https) : (pick(s.http) || location.origin);
+  document.querySelector('#openApp').href = app;
+  document.querySelector('#openApp').textContent = 'Mở ứng dụng — ' + app;
+
+  if (s.ca) document.querySelector('#fp').textContent = 'Vân tay SHA-256 của chứng chỉ: ' + s.ca.fingerprint;
+})();
+</script>
+</body>
+</html>
